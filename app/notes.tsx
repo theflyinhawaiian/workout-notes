@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, SafeAreaView, Pressable, View, Text, StatusBar } from 'react-native';
-import Workout from './components/Workout';
-import { WorkoutProps } from './model/WorkoutProps';
-import data from "./seed-data.json";
+import { StyleSheet, SafeAreaView, Button, Pressable, View, Text, StatusBar } from 'react-native';
+import Workout from '../components/Workout';
+import { WorkoutProps } from '../model/WorkoutProps';
+import data from "../seed-data.json";
 
 let workouts : WorkoutProps[] = data.workouts;
 
-export default function App() {
+export default function () {
   let [selectedIndex, setSelectedIndex] = useState(0);
 
   let goNext = () => {

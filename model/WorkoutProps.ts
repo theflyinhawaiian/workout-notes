@@ -1,7 +1,11 @@
 import { ExerciseProps } from './ExerciseProps';
 
-export type WorkoutProps = {
+export type Workout = {
     date: string,
-    exercises : ExerciseProps[],
+    exercises: ExerciseProps[]
+}
+
+export type WorkoutProps = {
+    data: Workout,
     style?: {}
 }

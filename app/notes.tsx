@@ -22,7 +22,7 @@ export default function () {
   let content : JSX.Element[] = [];
 
   workouts.forEach(workout => {
-    content.push(<Workout key={workout.date} {...workout} />);
+    content.push(<Workout key={workout.data.date} {...workout} />);
   });
 
   return (
@@ -31,7 +31,7 @@ export default function () {
         <Pressable style={styles.navControlStyle} onPress={goPrev}>
           <Text style={styles.navControlText}>Prev</Text>
         </Pressable>
-        <Text style={styles.headerStyle}>{workouts[selectedIndex].date}</Text>
+        <Text style={styles.headerStyle}>{workouts[selectedIndex].data.date}</Text>
         <Pressable style={styles.navControlStyle} onPress={goNext}>
           <Text style={styles.navControlText}>Next</Text>
         </Pressable>

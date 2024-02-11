@@ -1,15 +1,19 @@
-import { Pressable } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import workoutRepository from '../data/workoutRepository';
-import { Workout } from '../model/WorkoutProps';
 import { Instant } from '@js-joda/core';
 
-let addWorkout = (workout: Workout) => workoutRepository.add(workout);
+let addWorkout = () => workoutRepository.init();
 
 export default function () {
     return (
-        <Pressable onPress={() => addWorkout({ date: Instant.now().toString(), exercises: [] })}>
-            <Ionicons name="add" size={32} color="gray" />
+        <View>
+        <Pressable onPress={() => addWorkout()}>
+            <Text style={{fontSize: 32, color: "gray"}}>Init DB</Text>
         </Pressable>
+        <Pressable onPress={() => workoutRepository.getAll()}>
+            <Text style={{fontSize: 32, color: "gray"}}>Check DB</Text>
+        </Pressable>
+        </View>
     );
 }

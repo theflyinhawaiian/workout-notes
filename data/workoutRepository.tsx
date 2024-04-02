@@ -1,44 +1,55 @@
 import { WorkoutProps } from "../model/WorkoutProps";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
 
 const db = SQLite.openDatabase("workoutNotes.db");
 
 const migrations = 
 [
-    `create table if not exists workouts (id integer primary key, date text);
-    create table if not exists exercise_types (id integer primary key, exercise_name text not null unique);
-    create table if not exists exercises (id integer primary key, exercise_type_id integer, workout_id integer, foreign key(exercise_type_id) references exercise_types(id), foreign key(workout_id) references workouts (id));
-    create table if not exists sets (id integer primary key, value real, reps integer, exercise_id integer, foreign key(exercise_id) references exercises (id));`,
-    `insert into exercise_types (exercise_name) values ('Bench Press');
-    insert into exercise_types (exercise_name) values ('Bicep Curls');
-    insert into exercise_types (exercise_name) values ('Lat Pulldowns');`
+    (tx: SQLite.SQLTransaction) => { 
+            tx.executeSql(`create table if not exists workouts (id integer primary key, date text);`, []);
+    },
 ];
+
+function setVersion(tx: SQLite.SQLTransaction, version: number){
+    tx.executeSql(`PRAGMA user_version = ${version}`, []);
+}
 
 async function execMigrations(startVersion: number){
     let currVersion = startVersion;
-    await db.transactionAsync(async tx => {
-        console.log(`migrating to version ${currVersion}`);
+    console.log(`migrating to version ${currVersion}`);
+    let migration : () => void;
+    let nextMigration : () => void;
+
+    if(currVersion == migrations.length){
+        nextMigration = () => {};
+    }else{
+        nextMigration = () => execMigrations(currVersion + 1);
+    }
+
+    db.transaction(tx => {
         if(currVersion == migrations.length){
-            await tx.executeSqlAsync(`PRAGMA user_version = ${currVersion}`, [])
-            return;
+            migration = () => { setVersion(tx, currVersion); };
+        }else{
+            migration = () => { migrations[currVersion](tx); }
         }
-        
-        await tx.executeSqlAsync(migrations[currVersion], []);
-        execMigrations(currVersion+1);
-    });
+    }, () => {}, nextMigration);
 }
 
 export default {
     init: async () => {
-        db.transaction(tx => {
-            tx.executeSql("PRAGMA user_version;", [],
-            async (_, { rows: { _array } } ) => {
-                let userVersion = _array[0]["user_version"];
-                console.log(`detected userVersion: ${userVersion}`);
-                if(userVersion < migrations.length)
-                    await execMigrations(userVersion);
-            });
-        });
+        let result = await db.execAsync([{ sql: "PRAGMA user_version;", args: [] }], false);
+        console.log("my object: %o", result)
+        if("error" in result[0]){
+            console.log("woops");
+            return;
+        }
+
+        let userVersion = result[0].rows[0]["user_version"];
+        console.log(`detected userVersion: ${userVersion}`);
+        if(userVersion < migrations.length)
+            await execMigrations(userVersion);
     },
     getExerciseNames: () => {
         db.transaction(tx => {
@@ -71,5 +82,21 @@ export default {
         (_, { rows: { _array }}) => {
             console.log(_array.map(x => x.date).join("\n "));
         });
-    })}
+    })},
+    inspect: () => {
+        db.transaction(tx => {
+            tx.executeSql("SELECT name FROM sqlite_master WHERE type='table';", [], 
+            (_, {rows: { _array }}) => {
+                console.log("%o", _array);
+            })
+        })
+    },
+    export: async () => {
+        await Sharing.shareAsync(
+                FileSystem.documentDirectory + 'SQLite/workoutNotes.db', 
+                { dialogTitle: 'share or copy your DB via' }
+            ).catch((error: any) =>{
+                console.log(error);
+            })
+    }
 };

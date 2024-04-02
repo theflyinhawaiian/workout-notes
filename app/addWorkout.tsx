@@ -11,7 +11,7 @@ export default function () {
         <Pressable onPress={() => addWorkout()}>
             <Text style={{fontSize: 32, color: "gray"}}>Init DB</Text>
         </Pressable>
-        <Pressable onPress={() => workoutRepository.getAll()}>
+        <Pressable onPress={() => workoutRepository.export()}>
             <Text style={{fontSize: 32, color: "gray"}}>Check DB</Text>
         </Pressable>
         </View>

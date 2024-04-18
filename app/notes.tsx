@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, SafeAreaView, Button, Pressable, View, Text, StatusBar } from 'react-native';
 import Workout from '../components/Workout';
-import { WorkoutProps } from '../model/WorkoutProps';
-import data from "../seed-data.json";
-
-let workouts : WorkoutProps[] = data.workouts;
+import NoWorkoutsView from '../components/NoWorkoutsView';
+import { Workout as WorkoutModel } from '../model/Workout';
+import { useSQLiteContext } from 'expo-sqlite/next';
+import workoutRepository from '../data/workoutRepository';
 
 export default function () {
   let [selectedIndex, setSelectedIndex] = useState(0);
+  let [workouts, setWorkouts] = useState<WorkoutModel[]>([]);
+  let db = useSQLiteContext();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("fetching from notes page");
+      let workouts = await workoutRepository.getAll(db);
+      console.log(`retrieved ${workouts.length} workouts`);
+      setWorkouts(workouts);
+    };
+    fetchData();
+  }, []);
 
   let goNext = () => {
     if(selectedIndex < workouts.length - 1)
@@ -19,14 +31,12 @@ export default function () {
       setSelectedIndex(selectedIndex - 1);
   }
 
-  let content : JSX.Element[] = [];
-
-  workouts.forEach(workout => {
-    content.push(<Workout key={workout.date} {...workout} />);
-  });
+  if(workouts.length == 0)
+    return (<NoWorkoutsView />)
 
   return (
     <SafeAreaView style={styles.container}>
+      
       <View style={styles.headerBar}>
         <Pressable style={styles.navControlStyle} onPress={goPrev}>
           <Text style={styles.navControlText}>Prev</Text>
@@ -36,7 +46,7 @@ export default function () {
           <Text style={styles.navControlText}>Next</Text>
         </Pressable>
       </View>
-      <Workout {...workouts[selectedIndex]} style={styles.workoutContainer} />
+      <Workout data={workouts[selectedIndex]} style={styles.workoutContainer} />
     </SafeAreaView>
   );
 }

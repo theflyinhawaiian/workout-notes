@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, FlatList } from 'react-native';
-import { ExerciseProps } from "../model/ExerciseProps";
+import { ExerciseProps } from "../model/Exercise";
 import React from 'react';
 
 let styles = StyleSheet.create({
@@ -26,7 +26,7 @@ let styles = StyleSheet.create({
     }
 });
 
-const Exercise : React.FC<ExerciseProps> = ({ title, sets }) => {
+const Exercise : React.FC<ExerciseProps> = ({data: { title, sets }}) => {
     return (
         <View style={styles.container}>
             <View style={styles.headerBar}>

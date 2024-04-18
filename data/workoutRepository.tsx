@@ -1,102 +1,71 @@
-import { WorkoutProps } from "../model/WorkoutProps";
+import { Workout } from "../model/Workout";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
-import * as SQLite from "expo-sqlite";
-
-const db = SQLite.openDatabase("workoutNotes.db");
+import { type SQLiteDatabase } from "expo-sqlite/next";
 
 const migrations = 
 [
-    (tx: SQLite.SQLTransaction) => { 
-            tx.executeSql(`create table if not exists workouts (id integer primary key, date text);`, []);
+    async (db: SQLiteDatabase) => { 
+        await db.execAsync(`create table if not exists workouts (id integer primary key, date text);`);
+        await db.execAsync("create table if not exists exercise_types (id integer primary key, exercise_name text)")
+        await db.execAsync("create table if not exists exercises (id integer primary key, exercise_type_id integer, workout_id integer, foreign key(exercise_type_id) references exercise_types(id), foreign key(workout_id) references workouts (id))")
+        await db.execAsync("create table if not exists sets (id integer primary key, value real, reps integer, exercise_id integer, foreign key(exercise_id) references exercises (id))")
     },
 ];
 
-function setVersion(tx: SQLite.SQLTransaction, version: number){
-    tx.executeSql(`PRAGMA user_version = ${version}`, []);
+function setVersion(db: SQLiteDatabase, version: number){
+    console.log(`attempting  to set user version to ${version}`);
+    db.execAsync(`PRAGMA user_version = ${version}`);
 }
 
-async function execMigrations(startVersion: number){
+async function execMigrations(db: SQLiteDatabase, startVersion: number){
     let currVersion = startVersion;
     console.log(`migrating to version ${currVersion}`);
-    let migration : () => void;
-    let nextMigration : () => void;
 
-    if(currVersion == migrations.length){
-        nextMigration = () => {};
-    }else{
-        nextMigration = () => execMigrations(currVersion + 1);
+    if(currVersion < migrations.length)
+    {
+        await migrations[currVersion](db);
+        execMigrations(db, currVersion + 1);
     }
-
-    db.transaction(tx => {
-        if(currVersion == migrations.length){
-            migration = () => { setVersion(tx, currVersion); };
-        }else{
-            migration = () => { migrations[currVersion](tx); }
-        }
-    }, () => {}, nextMigration);
+    else
+    {
+        setVersion(db, currVersion);
+    }
 }
 
 export default {
-    init: async () => {
-        let result = await db.execAsync([{ sql: "PRAGMA user_version;", args: [] }], false);
-        console.log("my object: %o", result)
-        if("error" in result[0]){
-            console.log("woops");
-            return;
-        }
+    init: async (db: SQLiteDatabase) => {
+        let { user_version } = await db.getFirstAsync<{ user_version: number}>("PRAGMA user_version;") ?? { user_version: 0 };
 
-        let userVersion = result[0].rows[0]["user_version"];
-        console.log(`detected userVersion: ${userVersion}`);
-        if(userVersion < migrations.length)
-            await execMigrations(userVersion);
+        if(user_version < migrations.length)
+            await execMigrations(db, user_version);
     },
-    getExerciseNames: () => {
-        db.transaction(tx => {
-            tx.executeSql("Select exercise_name from exercises", [],
-            async (_, { rows: { _array } }) => {
-                console.log(_array);
-            });
-        });
+    getExerciseNames: (db: SQLiteDatabase) : Promise<Workout[]> =>
+            db.getAllAsync<Workout>("Select exercise_name from exercises"),
+    add: async (db: SQLiteDatabase, workout: Workout) => {
+        const workoutId = (await db.runAsync("insert into workouts (date) values (?)", workout.date)).lastInsertRowId;
+        console.log(`inserted workout on ${workout.date} as id: ${workoutId}`);
+        for(let exercise in workout.exercises){
+            let exerciseId = (await db.runAsync("insert or ignore into exercise_types (exercise_name) values (?)", exercise)).lastInsertRowId;
+            console.log(`inserted exercise ${exercise} as id: ${exerciseId}`);
+            await db.runAsync("insert into exercises (workout_id, exercise_type_id) values (?, ?)", workoutId, exerciseId);
+        }
     },
-    /*add: (workout: WorkoutProps) => {
-        db.transaction(tx => {
-            tx.executeSql("insert into workouts (date) values (?)", [workout.date],
-            async (_, { rows: { _array }}) => {
-                let workoutId = _array[0];
-                for(let exercise in workout.exercises){
-                    tx.executeSql("insert or ignore into exercise_types (exercise_name) values (?)", [exercise],
-                    async (_, { rows: { _array }}) => {
-                        let exerciseId = _array[0];
-                        tx.executeSql("insert into exercises (workout_id, exercise_type_id) values (?, ?)", [workoutId, exerciseId])
-                    })
-                }
-            });
-        })
-    },*/
     delete: (id: Number) => console.log("delete"),
-    update: (workout: WorkoutProps) => console.log("update"),
+    update: (workout: Workout) => console.log("update"),
     find: (id: Number) => console.log("find"),
-    getAll: () => { db.transaction(tx => {
-        tx.executeSql("select * from workouts", [], 
-        (_, { rows: { _array }}) => {
-            console.log(_array.map(x => x.date).join("\n "));
-        });
-    })},
-    inspect: () => {
-        db.transaction(tx => {
-            tx.executeSql("SELECT name FROM sqlite_master WHERE type='table';", [], 
-            (_, {rows: { _array }}) => {
-                console.log("%o", _array);
-            })
-        })
-    },
+    getAll: async (db: SQLiteDatabase) : Promise<Workout[]> => { 
+        console.log("fetching workouts");
+        const workouts = await db.getAllAsync<Workout>("select * from workouts");
+        console.log(workouts.map(x => x.date).join("\n "));
+        return workouts;
+    }, 
     export: async () => {
         await Sharing.shareAsync(
-                FileSystem.documentDirectory + 'SQLite/workoutNotes.db', 
-                { dialogTitle: 'share or copy your DB via' }
-            ).catch((error: any) =>{
-                console.log(error);
-            })
+            FileSystem.documentDirectory + 'SQLite/workoutNotes.db', 
+            { dialogTitle: 'share or copy your DB via' }
+        ).catch((error: any) =>{
+            console.log(error);
+        });
     }
 };

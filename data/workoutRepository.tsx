@@ -40,8 +40,8 @@ export default {
         if(user_version < migrations.length)
             await execMigrations(db, user_version);
     },
-    getExerciseNames: (db: SQLiteDatabase) : Promise<Workout[]> =>
-            db.getAllAsync<Workout>("Select exercise_name from exercises"),
+    getExerciseNames: (db: SQLiteDatabase) : Promise<string[]> =>
+            db.getAllAsync<string>("select exercise_name from exercises_types;"),
     add: async (db: SQLiteDatabase, workout: Workout) => {
         const workoutId = (await db.runAsync("insert into workouts (date) values (?)", workout.date)).lastInsertRowId;
         console.log(`inserted workout on ${workout.date} as id: ${workoutId}`);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, SafeAreaView, Button, Pressable, View, Text, StatusBar } from 'react-native';
+import { StyleSheet, Pressable, View, Text } from 'react-native';
 import Workout from '../components/Workout';
 import NoWorkoutsView from '../components/NoWorkoutsView';
 import { Workout as WorkoutModel } from '../model/Workout';
@@ -35,8 +35,7 @@ export default function () {
     return (<NoWorkoutsView />)
 
   return (
-    <SafeAreaView style={styles.container}>
-      
+    <>
       <View style={styles.headerBar}>
         <Pressable style={styles.navControlStyle} onPress={goPrev}>
           <Text style={styles.navControlText}>Prev</Text>
@@ -47,18 +46,11 @@ export default function () {
         </Pressable>
       </View>
       <Workout data={workouts[selectedIndex]} style={styles.workoutContainer} />
-    </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: StatusBar.currentHeight,
-    backgroundColor: '#fff',
-    alignItems: "flex-start",
-    justifyContent: 'space-around',
-  },
   headerBar: {
     flex:1,
     flexDirection: 'row',

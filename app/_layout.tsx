@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import workoutRepository from "../data/workoutRepository";
 import AddWorkoutButton from '../components/AddWorkoutButton';
@@ -8,10 +8,7 @@ export default function () {
     return (
     <SafeAreaView style={styles.container}>
         <SQLiteProvider databaseName="workoutNotes.db" onInit={workoutRepository.init}>
-            <Stack>
-                <Stack.Screen name="notes" options={{ headerRight: () => <AddWorkoutButton />}} />
-                <Stack.Screen name="addWorkout" options={{}} />
-            </Stack>
+            <Slot />
         </SQLiteProvider>
     </SafeAreaView>
     );

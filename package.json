@@ -12,7 +12,6 @@
     "@js-joda/core": "^5.6.1",
     "expo": "^51.0.34",
     "expo-constants": "~15.4.6",
-    "expo-dev-client": "~3.3.11",
     "expo-linking": "~6.2.2",
     "expo-router": "~3.4.8",
     "expo-sharing": "~11.10.0",

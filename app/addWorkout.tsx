@@ -1,30 +1,40 @@
-import { useState } from 'react';
-import { Pressable, Text, TextInput, View, FlatList } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Text, View, FlatList } from 'react-native';
 import workoutRepository from '../data/workoutRepository';
 import { useSQLiteContext } from 'expo-sqlite/next';
 import Exercise from '../components/Exercise';
 import { Exercise as ExerciseModel } from '../model/Exercise';
+import { LocalDateTime } from '@js-joda/core';
+import WorkoutForm from '../components/WorkoutForm';
 
 export default function () {
-    let [date, setDate] = useState("");
-    let [exercises, setExercises] = useState<ExerciseModel[]>([]);
-    let db = useSQLiteContext();
+    const dt = LocalDateTime.now();
+    const db = useSQLiteContext();
+    const [exercises, setExercises] = useState<ExerciseModel[]>([]);
 
-    let addWorkout = async () => {
-        const workout = { date, exercises }
+    const searchItems = [
+        { name: "yeet1" },
+        { name: "yeet2" },
+        { name: "yeat3" },
+        { name: "yeet4" },
+        { name: "bleat" },
+        { name: "skeet" }
+    ];
+
+    const addWorkout = useCallback(async () => {
+        const workout = { date: dt.toString(), exercises }
         workoutRepository.add(db, workout)
+    }, [dt, exercises]);
+
+    const addExercise = (exercise: ExerciseModel) => {
+        setExercises([...exercises, exercise])
     };
 
     return (
         <View>
-            <TextInput onChangeText={text => setDate(text)} />
+            <Text>Workout on {dt.toString()}</Text>
             <FlatList data={exercises} renderItem={props => <Exercise data={props.item} />} />
-            <TextInput onChangeText={text => setNewExerciseText() } />
-            <TextInput onChangeText={text => setNewExerciseWeight()} />
-            <TextInput onChangeText={text => setNewExerciseReps()} />
-            <Pressable onPress={() => addWorkout()}>
-                <Text style={{fontSize: 32, color: "gray"}}>Save</Text>
-            </Pressable>
+            <WorkoutForm onSave={addWorkout}/>
         </View>
     );
 }

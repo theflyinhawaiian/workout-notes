@@ -6,8 +6,7 @@ import { type SQLiteDatabase } from "expo-sqlite/next";
 const migrations = 
 [
     `create table if not exists workouts (id integer primary key, date text);
-     create table if not exists exercise_types (id integer primary key, exercise_name text);
-     create table if not exists exercises (id integer primary key, exercise_type_id integer, workout_id integer, foreign key(exercise_type_id) references exercise_types(id), foreign key(workout_id) references workouts (id));
+     create table if not exists exercises (id integer primary key, exercise_name text, workout_id integer, foreign key(workout_id) references workouts (id));
      create table if not exists sets (id integer primary key, value real, reps integer, exercise_id integer, foreign key(exercise_id) references exercises (id));`
 ];
 
@@ -42,14 +41,16 @@ export default {
             await execMigrations(db, user_version);
     },
     getExerciseNames: (db: SQLiteDatabase) : Promise<string[]> =>
-            db.getAllAsync<string>("select exercise_name from exercise_types;"),
+            db.getAllAsync<string>("select distinct exercise_name from exercises;"),
     add: async (db: SQLiteDatabase, workout: Workout) => {
         const workoutId = (await db.runAsync("insert into workouts (date) values (?)", workout.date)).lastInsertRowId;
         console.log(`inserted workout on ${workout.date} as id: ${workoutId}`);
-        for(const exercise in workout.exercises){
-            const exerciseId = (await db.runAsync("insert or ignore into exercise_types (exercise_name) values (?)", exercise)).lastInsertRowId;
-            console.log(`inserted exercise ${exercise} as id: ${exerciseId}`);
-            await db.runAsync("insert into exercises (workout_id, exercise_type_id) values (?, ?)", workoutId, exerciseId);
+        for(const exercise of workout.exercises){
+            const exerciseId = (await db.runAsync("insert into exercises (workout_id, exercise_name) values (?, ?)", workoutId, exercise.title)).lastInsertRowId;
+            const sets = exercise.sets ?? []
+            for(const set of sets){
+                await db.runAsync("insert into sets (value, reps, exercise_id) (?, ?, ?)", [set.amount ?? 0, set.reps, exerciseId]);
+            }
         }
     },
     delete: (id: Number) => console.log("delete"),

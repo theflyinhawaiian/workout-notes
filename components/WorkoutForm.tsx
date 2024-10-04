@@ -1,11 +1,11 @@
-import { LocalDateTime } from "@js-joda/core";
 import { useEffect, useState } from "react";
 import { TextInput, Pressable, Text, FlatList, View, Button } from "react-native";
 import { SetModel, Exercise } from "../model/Exercise";
 import SetDisplay from "./SetDisplay";
-import Dropdown from "react-native-select-dropdown";
 import { useSQLiteContext } from "expo-sqlite/next";
 import workoutRepository from "../data/workoutRepository";
+import HorizontalStack from "./HorizontalStack";
+import WorkoutsDropdown from "./WorkoutsDropdown";
 
 interface WorkoutFormProps {
     onSave: (data: Exercise) => void
@@ -21,10 +21,10 @@ export default function(props: WorkoutFormProps){
     const [addingNewWorkout, setAddingNewWorkout] = useState(false);
 
     const dropdownItems = [
-        { title: "yeetus" },
-        { title: "mcsqueetus" },
-        { title: "cletus" },
-        { title: "peetus" }
+        "yeetus",
+        "mcsqueetus",
+        "cletus",
+        "peetus"
     ];
 
     useEffect(() => {
@@ -37,33 +37,31 @@ export default function(props: WorkoutFormProps){
         fetchExerciseNames();
     }, []);
 
-    const workoutNameEntry = addingNewWorkout ?
+    // If we have no workouts or the user has selected to add a new workout, 
+    // we use a TextInput instead of dropdown
+    const workoutNameEntry = dropdownItems.length == 0 || addingNewWorkout ?
         (<TextInput placeholder="Workout name here..." />) :
-        (<Dropdown 
-            data={dropdownItems}
-            onSelect={selectedItem => console.log(selectedItem)}
-            renderItem={(item, idx, isSelected) => 
-            <View>
-                <Text>{item.title}</Text>
-            </View>}
-            renderButton={(selectedItem, isOpened) => 
-            <View style={{flexDirection: "row", justifyContent: "center"}}>
-                <Text>What do</Text>
-            </View>} />);
+        (<WorkoutsDropdown workouts={dropdownItems} />);
     
     return (
         <>
-        <View style={{flexDirection: "row", justifyContent: "center"}}>
+        <HorizontalStack>
             {workoutNameEntry}
-            <Text>Or</Text>
+            {/* We only want to display the 'or' + control toggle if workout names exist */}
+            {dropdownItems.length > 0 && 
+            (<>
+            <Text style={{ marginHorizontal: 10 }}>or</Text>
             <Button 
                 title={addingNewWorkout ? "Select a workout" : "Add a workout"}
                 onPress={() => setAddingNewWorkout(!addingNewWorkout)} />
-
-        </View>
+            </>)}
+        </HorizontalStack>
         <FlatList data={sets} renderItem={x => <SetDisplay data={x.item} />} />
-	 <TextInput onChangeText={text => setNewSetAmount(text)} />
-        <TextInput onChangeText={text => setNewSetReps(text)} />
+        <HorizontalStack>
+            <TextInput placeholder="amount" onChangeText={text => setNewSetAmount(text)} />
+            <Text>x</Text>
+            <TextInput placeholder="reps" onChangeText={text => setNewSetReps(text)} />
+        </HorizontalStack>
         <Pressable onPress={() => props.onSave({ title: newExerciseName, sets})}>
             <Text style={{fontSize: 32, color: "gray"}}>Save</Text>
         </Pressable>

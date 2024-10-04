@@ -8,26 +8,26 @@ import workoutRepository from '../data/workoutRepository';
 import AddWorkoutButton from '../components/AddWorkoutButton';
 
 export default function () {
-  let [selectedIndex, setSelectedIndex] = useState(0);
-  let [workouts, setWorkouts] = useState<WorkoutModel[]>([]);
-  let db = useSQLiteContext();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [workouts, setWorkouts] = useState<WorkoutModel[]>([]);
+  const db = useSQLiteContext();
 
   useEffect(() => {
     const fetchData = async () => {
       console.log("fetching from notes page");
-      let workouts = await workoutRepository.getAll(db);
+      const workouts = await workoutRepository.getAll(db);
       console.log(`retrieved ${workouts.length} workouts`);
       setWorkouts(workouts);
     };
     fetchData();
   }, []);
 
-  let goNext = () => {
+  const goNext = () => {
     if(selectedIndex < workouts.length - 1)
       setSelectedIndex(selectedIndex + 1);
   }
 
-  let goPrev = () => {
+  const goPrev = () => {
     if(selectedIndex > 0)
       setSelectedIndex(selectedIndex - 1);
   }

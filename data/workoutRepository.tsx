@@ -17,7 +17,7 @@ function setVersion(db: SQLiteDatabase, version: number){
 }
 
 async function execMigrations(db: SQLiteDatabase, startVersion: number){
-    let currVersion = startVersion;
+    const currVersion = startVersion;
     console.log(`migrating to version ${currVersion}`);
 
     if(currVersion < migrations.length)
@@ -34,7 +34,7 @@ async function execMigrations(db: SQLiteDatabase, startVersion: number){
 export default {
     init: async (db: SQLiteDatabase) => {
         await db.execAsync("PRAGMA foreign_keys = ON;");
-        let { user_version } = await db.getFirstAsync<{ user_version: number}>("PRAGMA user_version;") ?? { user_version: 0 };
+        const { user_version } = await db.getFirstAsync<{ user_version: number}>("PRAGMA user_version;") ?? { user_version: 0 };
 
         console.log(`User version: ${user_version}, num migrations: ${migrations.length}`);
 
@@ -46,8 +46,8 @@ export default {
     add: async (db: SQLiteDatabase, workout: Workout) => {
         const workoutId = (await db.runAsync("insert into workouts (date) values (?)", workout.date)).lastInsertRowId;
         console.log(`inserted workout on ${workout.date} as id: ${workoutId}`);
-        for(let exercise in workout.exercises){
-            let exerciseId = (await db.runAsync("insert or ignore into exercise_types (exercise_name) values (?)", exercise)).lastInsertRowId;
+        for(const exercise in workout.exercises){
+            const exerciseId = (await db.runAsync("insert or ignore into exercise_types (exercise_name) values (?)", exercise)).lastInsertRowId;
             console.log(`inserted exercise ${exercise} as id: ${exerciseId}`);
             await db.runAsync("insert into exercises (workout_id, exercise_type_id) values (?, ?)", workoutId, exerciseId);
         }
@@ -70,3 +70,4 @@ export default {
         });
     }
 };
+    

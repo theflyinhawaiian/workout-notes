@@ -1,8 +1,9 @@
 import { StyleSheet, View, Text, FlatList } from 'react-native';
 import { ExerciseProps } from "../model/Exercise";
 import React from 'react';
+import SetDisplay from './SetDisplay';
 
-let styles = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         borderRadius: 5,

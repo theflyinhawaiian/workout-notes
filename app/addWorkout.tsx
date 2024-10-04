@@ -12,15 +12,6 @@ export default function () {
     const db = useSQLiteContext();
     const [exercises, setExercises] = useState<ExerciseModel[]>([]);
 
-    const searchItems = [
-        { name: "yeet1" },
-        { name: "yeet2" },
-        { name: "yeat3" },
-        { name: "yeet4" },
-        { name: "bleat" },
-        { name: "skeet" }
-    ];
-
     const addWorkout = useCallback(async () => {
         const workout = { date: dt.toString(), exercises }
         workoutRepository.add(db, workout)

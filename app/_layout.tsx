@@ -1,7 +1,6 @@
-import { Slot, Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import workoutRepository from "../data/workoutRepository";
-import AddWorkoutButton from '../components/AddWorkoutButton';
 import { SQLiteProvider } from 'expo-sqlite/next';
 
 export default function () {

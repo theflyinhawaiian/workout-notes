@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Text, View, FlatList } from 'react-native';
+import { Text, View } from 'react-native';
 import workoutRepository from '../data/workoutRepository';
 import { useSQLiteContext } from 'expo-sqlite/next';
 import Exercise from '../components/Exercise';
 import { Exercise as ExerciseModel } from '../model/Exercise';
 import { LocalDateTime } from '@js-joda/core';
 import WorkoutForm from '../components/WorkoutForm';
+import List from '../components/List';
 
 export default function () {
     const dt = LocalDateTime.now();
@@ -24,7 +25,7 @@ export default function () {
     return (
         <View>
             <Text>Workout on {dt.toString()}</Text>
-            <FlatList data={exercises} renderItem={props => <Exercise data={props.item} />} />
+            <List data={exercises} renderItem={props => <Exercise data={props.item} />} />
             <WorkoutForm onSave={addWorkout}/>
         </View>
     );

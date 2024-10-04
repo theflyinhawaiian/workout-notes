@@ -27,7 +27,8 @@ const styles = StyleSheet.create({
     }
 });
 
-const Exercise : React.FC<ExerciseProps> = ({data: { title, sets }}) => {
+const Exercise = (props: ExerciseProps) => {
+    const { title, sets } = props.data
     return (
         <View style={styles.container}>
             <View style={styles.headerBar}>

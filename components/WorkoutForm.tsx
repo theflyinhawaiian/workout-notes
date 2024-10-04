@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TextInput, Pressable, Text, FlatList, View, Button } from "react-native";
+import { TextInput, Pressable, Text, Button } from "react-native";
 import { SetModel, Exercise } from "../model/Exercise";
 import SetDisplay from "./SetDisplay";
 import { useSQLiteContext } from "expo-sqlite/next";
@@ -56,7 +56,7 @@ export default function(props: WorkoutFormProps){
                 onPress={() => setAddingNewWorkout(!addingNewWorkout)} />
             </>)}
         </HorizontalStack>
-        <FlatList data={sets} renderItem={x => <SetDisplay data={x.item} />} />
+        <List data={sets} renderItem={x => <SetDisplay data={x.item} />} />
         <HorizontalStack>
             <TextInput placeholder="amount" onChangeText={text => setNewSetAmount(text)} />
             <Text>x</Text>

@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: StatusBar.currentHeight,
         backgroundColor: '#fff',
-        alignItems: "flex-start",
-        justifyContent: 'space-around',
+        alignItems: "center",
+        justifyContent: 'center',
     },
 });

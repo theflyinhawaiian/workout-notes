@@ -17,10 +17,13 @@ export default function(props: WorkoutsDropdownProps){
         <Dropdown 
             data={dropdownItems}
             onSelect={(selectedItem: DropdownItem) => console.log(selectedItem)}
-            renderItem={(item: DropdownItem, idx: number, isSelected: boolean) => 
-            <View>
-                <Text>{item.title}</Text>
-            </View>}
+            renderItem={(item: DropdownItem, idx: number, isSelected: boolean) => {
+                const bgColor = isSelected ? { backgroundColor: "#9393f1f1" } : null;
+                return (
+                    <View style={{padding: 10, ...bgColor}}>
+                        <Text>{item.title}</Text>
+                    </View>);
+            }}
             renderButton={(selectedItem: DropdownItem, isOpened: boolean) => 
             <View>
                 <HorizontalStack>

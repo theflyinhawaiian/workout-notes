@@ -16,7 +16,7 @@ export default function(props: WorkoutFormProps){
     const [sets, setSets] = useState<SetModel[]>([]);
     const [pastExerciseNames, setPastExerciseNames] = useState<String[]>([]);
     const [newExerciseName, setNewExerciseName] = useState<string>("");
-    const [newSetWeight, setNewSetWeight] = useState<string>();
+    const [newSetAmount, setNewSetAmount] = useState<string>();
     const [newSetReps, setNewSetReps] = useState<string>();
     const [addingNewWorkout, setAddingNewWorkout] = useState(false);
 
@@ -62,7 +62,7 @@ export default function(props: WorkoutFormProps){
 
         </View>
         <FlatList data={sets} renderItem={x => <SetDisplay data={x.item} />} />
-        <TextInput onChangeText={text => setNewSetWeight(text)} />
+	 <TextInput onChangeText={text => setNewSetAmount(text)} />
         <TextInput onChangeText={text => setNewSetReps(text)} />
         <Pressable onPress={() => props.onSave({ title: newExerciseName, sets})}>
             <Text style={{fontSize: 32, color: "gray"}}>Save</Text>

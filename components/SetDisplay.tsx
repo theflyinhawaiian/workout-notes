@@ -6,7 +6,7 @@ export interface SetDisplayProps {
 }
 
 export default function(props: SetDisplayProps){
-    const {weight, reps} = props.data;
+    const {amount: weight, reps} = props.data;
     return (
         <Text>{weight} x {reps}</Text>
     );

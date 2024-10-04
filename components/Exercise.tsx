@@ -35,8 +35,8 @@ const Exercise : React.FC<ExerciseProps> = ({data: { title, sets }}) => {
             <FlatList style={{ marginTop: 5, marginBottom: 5}}data={sets} renderItem={x => {
                 let text = "";
 
-                if(x.item.weight != undefined){
-                    text = x.item.weight + " x " + x.item.reps;
+                if(x.item.amount != undefined){
+                    text = x.item.amount + " x " + x.item.reps;
                 }else{
                     text = x.item.reps.toString();
                 }

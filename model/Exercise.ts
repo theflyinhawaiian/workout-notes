@@ -8,6 +8,6 @@ export type ExerciseProps = {
 };
 
 export type SetModel = {
-    weight?: number,
+    amount?: number,
     reps: number
 }

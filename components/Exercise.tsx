@@ -32,19 +32,7 @@ const Exercise : React.FC<ExerciseProps> = ({data: { title, sets }}) => {
             <View style={styles.headerBar}>
                 <Text style={styles.exerciseText}>{ title }</Text>
             </View>
-            <FlatList style={{ marginTop: 5, marginBottom: 5}}data={sets} renderItem={x => {
-                let text = "";
-
-                if(x.item.amount != undefined){
-                    text = x.item.amount + " x " + x.item.reps;
-                }else{
-                    text = x.item.reps.toString();
-                }
-
-                return (
-                    <Text style={styles.setText}>{text}</Text>
-                )
-            }} />
+            <FlatList style={{ marginTop: 5, marginBottom: 5}}data={sets} renderItem={x => <SetDisplay data={x.item} /> } />
         </View>
     )
 }

@@ -1,9 +1,10 @@
-import { PropsWithChildren } from "react";
-import { View } from "react-native";
+import { View, ViewProps, StyleSheet } from "react-native";
 
-export default function (props: PropsWithChildren) {
+export default function (props: ViewProps) {
+    const { style } = props;
+    const viewStyle = StyleSheet.compose(style, { flexDirection: "row", justifyContent: "center", alignItems: "center" })
     return (
-        <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+        <View style={viewStyle}>
             {props.children}
         </View>
     )

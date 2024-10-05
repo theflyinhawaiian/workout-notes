@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { TextInput, Pressable, Text, Button } from "react-native";
+import { TextInput, Pressable, Text, Button, StyleSheet, View } from "react-native";
 import { SetModel, Exercise } from "../model/Exercise";
 import SetDisplay from "./SetDisplay";
 import { useSQLiteContext } from "expo-sqlite/next";
 import workoutRepository from "../data/workoutRepository";
 import HorizontalStack from "./HorizontalStack";
 import WorkoutsDropdown from "./WorkoutsDropdown";
+import { Ionicons } from "@expo/vector-icons";
+import List from "./List";
 
 interface WorkoutFormProps {
     onSave: (data: Exercise) => void
@@ -14,18 +16,11 @@ interface WorkoutFormProps {
 export default function(props: WorkoutFormProps){
     const db = useSQLiteContext();
     const [sets, setSets] = useState<SetModel[]>([]);
-    const [pastExerciseNames, setPastExerciseNames] = useState<String[]>([]);
+    const [pastExerciseNames, setPastExerciseNames] = useState<string[]>([]);
     const [newExerciseName, setNewExerciseName] = useState<string>("");
-    const [newSetAmount, setNewSetAmount] = useState<string>();
-    const [newSetReps, setNewSetReps] = useState<string>();
+    const [newSetAmountText, setNewSetAmountText] = useState<string>("");
+    const [newSetRepsText, setNewSetRepsText] = useState<string>("");
     const [addingNewWorkout, setAddingNewWorkout] = useState(false);
-
-    const dropdownItems = [
-        "yeetus",
-        "mcsqueetus",
-        "cletus",
-        "peetus"
-    ];
 
     useEffect(() => {
         const fetchExerciseNames = async () => {
@@ -39,16 +34,30 @@ export default function(props: WorkoutFormProps){
 
     // If we have no workouts or the user has selected to add a new workout, 
     // we use a TextInput instead of dropdown
-    const workoutNameEntry = dropdownItems.length == 0 || addingNewWorkout ?
-        (<TextInput placeholder="Workout name here..." />) :
-        (<WorkoutsDropdown workouts={dropdownItems} />);
+    const workoutNameEntry = pastExerciseNames.length == 0 || addingNewWorkout ?
+        (<TextInput style={styles.textInput} placeholder="Exercise name here..." onChangeText={x => setNewExerciseName(x)} />) :
+        (<WorkoutsDropdown workouts={pastExerciseNames} onItemSelected={x => setNewExerciseName(x)} />);
+    
+    const addSet = () => {
+        const setAmtValue = Number(newSetAmountText);
+        const setRepsValue = Number(newSetRepsText);
+
+        if(isNaN(setAmtValue) || isNaN(setRepsValue) || setRepsValue === 0){
+            // TODO: alert user of invalid input
+            return;
+        }
+
+        setSets([...sets, { amount: setAmtValue, reps: setRepsValue }]);
+        setNewSetAmountText("");
+        setNewSetRepsText("");
+    }
     
     return (
         <>
         <HorizontalStack>
             {workoutNameEntry}
             {/* We only want to display the 'or' + control toggle if workout names exist */}
-            {dropdownItems.length > 0 && 
+            {pastExerciseNames.length > 0 && 
             (<>
             <Text style={{ marginHorizontal: 10 }}>or</Text>
             <Button 
@@ -56,15 +65,36 @@ export default function(props: WorkoutFormProps){
                 onPress={() => setAddingNewWorkout(!addingNewWorkout)} />
             </>)}
         </HorizontalStack>
-        <List data={sets} renderItem={x => <SetDisplay data={x.item} />} />
+        {sets.length == 0 
+            ? <Text style={styles.setsMargin}>Add some sets:</Text>
+            : <List listStyle={styles.setsMargin} data={sets} renderItem={x => <SetDisplay data={x.item} />} />}
         <HorizontalStack>
-            <TextInput placeholder="amount" onChangeText={text => setNewSetAmount(text)} />
-            <Text>x</Text>
-            <TextInput placeholder="reps" onChangeText={text => setNewSetReps(text)} />
+            <TextInput 
+                style={styles.textInput} 
+                placeholder="amount" 
+                keyboardType="numeric" 
+                onChangeText={text => setNewSetAmountText(text)} 
+                value={newSetAmountText} />
+            <Text style={{ margin: 10 }}>x</Text>
+            <TextInput 
+                style={styles.textInput} 
+                placeholder="reps" 
+                keyboardType="numeric" 
+                onChangeText={text => setNewSetRepsText(text)} 
+                value={newSetRepsText} />
+            <Ionicons style={styles.addIcon} name="add-circle-outline" onPress={() => addSet()} size={24} />
         </HorizontalStack>
-        <Pressable onPress={() => props.onSave({ title: newExerciseName, sets})}>
-            <Text style={{fontSize: 32, color: "gray"}}>Save</Text>
-        </Pressable>
+        <View style={{ flexDirection: "row-reverse" }}>
+            <Pressable onPress={() => props.onSave({ title: newExerciseName, sets})}>
+                <Text style={{ fontSize: 32, color: "gray" }}>Save</Text>
+            </Pressable>
+        </View>
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    textInput: { fontSize: 18, borderWidth: 1, borderColor: "#8a8a8a", padding: 5, borderRadius: 10 },
+    addIcon: { marginLeft: 10 },
+    setsMargin: { marginTop: 5, marginBottom: 10 }
+});

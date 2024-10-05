@@ -1,7 +1,13 @@
-import { FlatList, FlatListProps } from "react-native";
+import { FlatList, FlatListProps, StyleProp, StyleSheet, ViewStyle } from "react-native";
 
-export default function<TItem>(props: FlatListProps<TItem>){
+interface ListProps<TItem> extends FlatListProps<TItem> {
+    listStyle: StyleProp<ViewStyle>;
+}
+
+export default function<TItem>(props: ListProps<TItem>){
+    const { listStyle } = props;
+    const viewStyle = StyleSheet.compose(listStyle, { flexGrow: 0 })
     return (
-        <FlatList style={{ flexGrow: 0}} {...props} />
+        <FlatList contentContainerStyle={{ alignItems: "center" }} style={viewStyle} {...props} />
     );
 }

@@ -11,6 +11,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
     "@js-joda/core": "^5.6.1",
+    "@js-joda/locale_en-us": "^4.14.0",
     "expo": "~51.0.36",
     "expo-constants": "~16.0.2",
     "expo-linking": "~6.3.1",

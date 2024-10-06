@@ -9,11 +9,11 @@ import WorkoutsDropdown from "./WorkoutsDropdown";
 import { Ionicons } from "@expo/vector-icons";
 import List from "./List";
 
-interface WorkoutFormProps {
+interface ExerciseFormProps {
     onSave: (data: Exercise) => void
 }
 
-export default function(props: WorkoutFormProps){
+export default function(props: ExerciseFormProps){
     const db = useSQLiteContext();
     const [sets, setSets] = useState<SetModel[]>([]);
     const [pastExerciseNames, setPastExerciseNames] = useState<string[]>([]);
@@ -21,6 +21,7 @@ export default function(props: WorkoutFormProps){
     const [newSetAmountText, setNewSetAmountText] = useState<string>("");
     const [newSetRepsText, setNewSetRepsText] = useState<string>("");
     const [addingNewWorkout, setAddingNewWorkout] = useState(false);
+    const { onSave } = props;
 
     useEffect(() => {
         const fetchExerciseNames = async () => {
@@ -31,12 +32,6 @@ export default function(props: WorkoutFormProps){
 
         fetchExerciseNames();
     }, []);
-
-    // If we have no workouts or the user has selected to add a new workout, 
-    // we use a TextInput instead of dropdown
-    const workoutNameEntry = pastExerciseNames.length == 0 || addingNewWorkout ?
-        (<TextInput style={styles.textInput} placeholder="Exercise name here..." onChangeText={x => setNewExerciseName(x)} />) :
-        (<WorkoutsDropdown workouts={pastExerciseNames} onItemSelected={x => setNewExerciseName(x)} />);
     
     const addSet = () => {
         const setAmtValue = Number(newSetAmountText);
@@ -51,6 +46,24 @@ export default function(props: WorkoutFormProps){
         setNewSetAmountText("");
         setNewSetRepsText("");
     }
+
+    const saveExercise = () => {
+        onSave({ title: newExerciseName, sets: sets })
+        setSets([]);
+        setNewSetAmountText("");
+        setNewSetRepsText("");
+        setNewExerciseName("");
+    }
+
+    // If we have no workouts or the user has selected to add a new workout, 
+    // we use a TextInput instead of dropdown
+    const workoutNameEntry = pastExerciseNames.length == 0 || addingNewWorkout ?
+        (<TextInput 
+            style={styles.textInput} 
+            placeholder="Exercise name here..." 
+            onChangeText={x => setNewExerciseName(x)} 
+            value={newExerciseName}/>) :
+        (<WorkoutsDropdown workouts={pastExerciseNames} onItemSelected={x => setNewExerciseName(x)} />);
     
     return (
         <>
@@ -85,8 +98,8 @@ export default function(props: WorkoutFormProps){
             <Ionicons style={styles.addIcon} name="add-circle-outline" onPress={() => addSet()} size={24} />
         </HorizontalStack>
         <View style={{ flexDirection: "row-reverse" }}>
-            <Pressable onPress={() => props.onSave({ title: newExerciseName, sets})}>
-                <Text style={{ fontSize: 32, color: "gray" }}>Save</Text>
+            <Pressable onPress={() => saveExercise()}>
+                <Text style={{ fontSize: 32, color: "gray" }}>Next</Text>
             </Pressable>
         </View>
         </>

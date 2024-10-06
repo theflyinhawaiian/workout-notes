@@ -34,7 +34,7 @@ const Exercise = (props: ExerciseProps) => {
             <View style={styles.headerBar}>
                 <Text style={styles.exerciseText}>{ title }</Text>
             </View>
-            <FlatList style={{ marginTop: 5, marginBottom: 5}}data={sets} renderItem={x => <SetDisplay data={x.item} /> } />
+            <FlatList style={{ marginTop: 5, marginBottom: 5}} data={sets} renderItem={x => <SetDisplay data={x.item} /> } />
         </View>
     )
 }

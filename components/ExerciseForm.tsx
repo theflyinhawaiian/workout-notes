@@ -8,6 +8,7 @@ import HorizontalStack from "./HorizontalStack";
 import WorkoutsDropdown from "./WorkoutsDropdown";
 import { Ionicons } from "@expo/vector-icons";
 import List from "./List";
+import { Snackbar as ErrorMessageBar } from "react-native-paper";
 
 interface ExerciseFormProps {
     onSave: (data: Exercise) => void
@@ -21,6 +22,7 @@ export default function(props: ExerciseFormProps){
     const [newSetAmountText, setNewSetAmountText] = useState<string>("");
     const [newSetRepsText, setNewSetRepsText] = useState<string>("");
     const [addingNewWorkout, setAddingNewWorkout] = useState(false);
+    const [error, setError] = useState({ message: "", shouldDisplay: false });
     const { onSave } = props;
 
     useEffect(() => {
@@ -32,13 +34,15 @@ export default function(props: ExerciseFormProps){
 
         fetchExerciseNames();
     }, []);
+
+    const isValid = (val: number) => !isNaN(val) && val >= 0; 
     
     const addSet = () => {
         const setAmtValue = Number(newSetAmountText);
         const setRepsValue = Number(newSetRepsText);
 
-        if(isNaN(setAmtValue) || isNaN(setRepsValue) || setRepsValue === 0){
-            // TODO: alert user of invalid input
+        if(!isValid(setAmtValue) || !isValid(setRepsValue) || setRepsValue === 0){
+            setError({ message: "Need valid value for amount and reps", shouldDisplay: true });
             return;
         }
 
@@ -48,6 +52,17 @@ export default function(props: ExerciseFormProps){
     }
 
     const saveExercise = () => {
+
+        if(newExerciseName.length == 0) {
+            setError({ message: "Need an exercise name", shouldDisplay: true });
+            return;
+        }
+
+        if(sets.length == 0){
+            setError({ message: "Add some sets", shouldDisplay: true });
+            return;
+        }
+
         onSave({ title: newExerciseName, sets: sets })
         setSets([]);
         setNewSetAmountText("");
@@ -102,6 +117,13 @@ export default function(props: ExerciseFormProps){
                 <Text style={{ fontSize: 32, color: "gray" }}>Next</Text>
             </Pressable>
         </View>
+        <ErrorMessageBar
+            visible={error.shouldDisplay}
+            duration={3000}
+            onDismiss={() => setError({ ...error, shouldDisplay: false })}
+            style={{ width: "80%" }}>
+                {error.message}
+        </ErrorMessageBar>
         </>
     );
 }

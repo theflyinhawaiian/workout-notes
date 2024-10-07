@@ -7,8 +7,8 @@ import { Exercise, SetModel } from "../model/Exercise";
 const migrations = 
 [
     `create table if not exists workouts (id integer primary key, date text);
-     create table if not exists exercises (id integer primary key, exercise_name text, workout_id integer, foreign key(workout_id) references workouts (id));
-     create table if not exists sets (id integer primary key, value real, reps integer, exercise_id integer, foreign key(exercise_id) references exercises (id));`
+     create table if not exists exercises (id integer primary key, exerciseName text, workoutId integer, foreign key(workoutId) references workouts (id));
+     create table if not exists sets (id integer primary key, value real, reps integer, exerciseId integer, foreign key(exerciseId) references exercises (id));`
 ];
 
 function setVersion(db: SQLiteDatabase, version: number){
@@ -42,15 +42,15 @@ export default {
             await execMigrations(db, user_version);
     },
     getExerciseNames: async (db: SQLiteDatabase) : Promise<string[]> =>
-            (await db.getAllAsync<{ exercise_name: string }>("select distinct exercise_name from exercises;")).map(x => x.exercise_name),
+            (await db.getAllAsync<{ exerciseName: string }>("select distinct exerciseName from exercises;")).map(x => x.exerciseName),
     add: async (db: SQLiteDatabase, workout: Workout) => {
         const workoutId = (await db.runAsync("insert into workouts (date) values (?)", workout.date)).lastInsertRowId;
         console.log(`inserted workout on ${workout.date} as id: ${workoutId}`);
         for(const exercise of workout.exercises){
-            const exerciseId = (await db.runAsync("insert into exercises (workout_id, exercise_name) values (?, ?)", workoutId, exercise.title)).lastInsertRowId;
+            const exerciseId = (await db.runAsync("insert into exercises (workoutId, exerciseName) values (?, ?)", workoutId, exercise.title)).lastInsertRowId;
             const sets = exercise.sets ?? []
             for(const set of sets){
-                await db.runAsync("insert into sets (value, reps, exercise_id) values (?, ?, ?)", set.amount ?? 0, set.reps, exerciseId);
+                await db.runAsync("insert into sets (value, reps, exerciseId) values (?, ?, ?)", set.amount ?? 0, set.reps, exerciseId);
             }
         }
     },
@@ -62,15 +62,15 @@ export default {
         const workoutData = await db.getAllAsync<{id : string, date: string}>("select * from workouts");
         const workouts: Workout[] = [];
         for(const workout of workoutData){
-            const exerciseData = await db.getAllAsync<{id: string, exercise_name: string}>(`select * from exercises where workout_id = ${workout.id}`);
+            const exerciseData = await db.getAllAsync<{id: string, exerciseName: string}>(`select * from exercises where workoutId = ${workout.id}`);
             const exercises : Exercise[] = [];
             for(const exercise of exerciseData){
-                const setData = await db.getAllAsync<{value: number, reps: number}>(`select * from sets where exercise_id = ${exercise.id}`);
+                const setData = await db.getAllAsync<{value: number, reps: number}>(`select * from sets where exerciseId = ${exercise.id}`);
                 const sets : SetModel[] = [];
                 for(const set of setData){
                     sets.push({ amount: set.value, reps: set.reps});
                 }
-                exercises.push({ title: exercise.exercise_name, sets });
+                exercises.push({ title: exercise.exerciseName, sets });
             }
             workouts.push({ date: workout.date, exercises });
         }

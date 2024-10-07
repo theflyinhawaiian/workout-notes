@@ -27,11 +27,15 @@ export default function(props: WorkoutsDropdownProps){
                     </View>);
             }}
             renderButton={(selectedItem: DropdownItem, isOpened: boolean) => 
-            <View>
-                <HorizontalStack>
-                    <Text style={{ marginHorizontal: 10 }}>Select a workout</Text>
-                    <Ionicons name="caret-down" />
-                </HorizontalStack>
-            </View>} />
+            {
+                const titleText = !isOpened && selectedItem !== null 
+                    ? selectedItem.title 
+                    : "Select a workout"; 
+                return (<View>
+                        <HorizontalStack>
+                            <Text style={{ marginHorizontal: 10 }}>{titleText}</Text>
+                            <Ionicons name="caret-down" />
+                        </HorizontalStack>
+                    </View>);}} />
     );
 }

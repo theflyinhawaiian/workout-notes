@@ -2,6 +2,7 @@ import { Workout } from "../model/Workout";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { type SQLiteDatabase } from "expo-sqlite/next";
+import { Exercise, SetModel } from "../model/Exercise";
 
 const migrations = 
 [
@@ -49,7 +50,7 @@ export default {
             const exerciseId = (await db.runAsync("insert into exercises (workout_id, exercise_name) values (?, ?)", workoutId, exercise.title)).lastInsertRowId;
             const sets = exercise.sets ?? []
             for(const set of sets){
-                await db.runAsync("insert into sets (value, reps, exercise_id) (?, ?, ?)", [set.amount ?? 0, set.reps, exerciseId]);
+                await db.runAsync("insert into sets (value, reps, exercise_id) values (?, ?, ?)", set.amount ?? 0, set.reps, exerciseId);
             }
         }
     },
@@ -58,8 +59,21 @@ export default {
     find: (id: Number) => console.log("find"),
     getAll: async (db: SQLiteDatabase) : Promise<Workout[]> => { 
         console.log("fetching workouts");
-        const workouts = await db.getAllAsync<Workout>("select * from workouts");
-        console.log(workouts.map(x => x.date).join("\n "));
+        const workoutData = await db.getAllAsync<{id : string, date: string}>("select * from workouts");
+        const workouts: Workout[] = [];
+        for(const workout of workoutData){
+            const exerciseData = await db.getAllAsync<{id: string, exercise_name: string}>(`select * from exercises where workout_id = ${workout.id}`);
+            const exercises : Exercise[] = [];
+            for(const exercise of exerciseData){
+                const setData = await db.getAllAsync<{value: number, reps: number}>(`select * from sets where exercise_id = ${exercise.id}`);
+                const sets : SetModel[] = [];
+                for(const set of setData){
+                    sets.push({ amount: set.value, reps: set.reps});
+                }
+                exercises.push({ title: exercise.exercise_name, sets });
+            }
+            workouts.push({ date: workout.date, exercises });
+        }
         return workouts;
     }, 
     export: async () => {

@@ -4,18 +4,16 @@ import workoutRepository from '../data/workoutRepository';
 import { useSQLiteContext } from 'expo-sqlite/next';
 import Exercise from '../components/Exercise';
 import { Exercise as ExerciseModel } from '../model/Exercise';
-import { DateTimeFormatter, LocalDateTime } from '@js-joda/core';
-import { Locale } from "@js-joda/locale_en-us";
 import List from '../components/List';
 import ExerciseForm from '../components/ExerciseForm';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { DateTime } from 'luxon';
 
 export default function () {
-    const dt = LocalDateTime.now();
+    const dt = DateTime.now();
     const router = useRouter();
-    const formatter = DateTimeFormatter.ofPattern('EEEE, MMMM d').withLocale(Locale.ENGLISH);
-    const displayDate = dt.format(formatter);
+    const displayDate = dt.toLocaleString(DateTime.DATE_MED);
     const db = useSQLiteContext();
     const [exercises, setExercises] = useState<ExerciseModel[]>([]);
 

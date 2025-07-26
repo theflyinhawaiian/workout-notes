@@ -6,6 +6,7 @@ import { Workout as WorkoutModel } from '../model/Workout';
 import { useSQLiteContext } from 'expo-sqlite/next';
 import workoutRepository from '../data/workoutRepository';
 import AddWorkoutButton from '../components/AddWorkoutButton';
+import { DateTime } from 'luxon';
 
 export default function () {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -32,6 +33,8 @@ export default function () {
       setSelectedIndex(selectedIndex - 1);
   }
 
+  const dateString = DateTime.fromJSDate(new Date(workouts[selectedIndex]?.date)).toLocaleString(DateTime.DATE_MED);
+
   const innerContent = workouts.length == 0 
     ? (<View style={styles.workoutContainer}>
          <NoWorkoutsView />
@@ -41,7 +44,7 @@ export default function () {
           <Pressable style={styles.navControlStyle} onPress={goPrev}>
             <Text style={styles.navControlText}>Prev</Text>
           </Pressable>
-          <Text style={styles.headerStyle}>{workouts[selectedIndex].date}</Text>
+          <Text style={styles.headerStyle}>{dateString}</Text>
           <Pressable style={styles.navControlStyle} onPress={goNext}>
             <Text style={styles.navControlText}>Next</Text>
           </Pressable>

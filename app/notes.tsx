@@ -5,8 +5,10 @@ import NoWorkoutsView from '../components/NoWorkoutsView';
 import { Workout as WorkoutModel } from '../model/Workout';
 import { useSQLiteContext } from 'expo-sqlite/next';
 import workoutRepository from '../data/workoutRepository';
-import AddWorkoutButton from '../components/AddWorkoutButton';
 import { DateTime } from 'luxon';
+import { router } from 'expo-router';
+import { FAB } from 'react-native-paper';
+import { Feather } from '@expo/vector-icons';
 
 export default function () {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -55,9 +57,12 @@ export default function () {
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
-        <AddWorkoutButton />
+        <Pressable onPress={() => router.push('/settings')}>
+          <Feather name="more-vertical" size={24} color="black" />
+        </Pressable>
       </View>
       {innerContent}
+      <FAB style={styles.fab} icon="plus" onPress={() => { router.push('/addWorkout') }} />
     </View>
   );
 }
@@ -71,7 +76,8 @@ const styles = StyleSheet.create({
   },
   headerBar: {
     alignItems: "flex-end",
-    width: "100%"
+    width: "100%",
+    padding: 10
   },
   dateNav: {
     flex:1,
@@ -83,5 +89,13 @@ const styles = StyleSheet.create({
   },
   headerStyle: { flex: 1, textAlign: "center", verticalAlign: "middle", fontSize: 30, marginTop: 10 },
   navControlStyle: { backgroundColor: "gray", justifyContent: "center", paddingStart: 10, paddingEnd: 10, borderRadius: 5 },
-  navControlText: { color: "white", textAlign: "center", verticalAlign: "middle" }
+  navControlText: { color: "white", textAlign: "center", verticalAlign: "middle" },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'gray',
+    color: 'white'
+  }
 });

@@ -9,6 +9,7 @@ import WorkoutsDropdown from "./WorkoutsDropdown";
 import { Ionicons } from "@expo/vector-icons";
 import List from "./List";
 import { Snackbar as ErrorMessageBar } from "react-native-paper";
+import { showSnackbar } from "../util/snackbars";
 
 interface ExerciseFormProps {
     onSave: (data: Exercise) => void
@@ -22,7 +23,6 @@ export default function(props: ExerciseFormProps){
     const [newSetAmountText, setNewSetAmountText] = useState<string>("");
     const [newSetRepsText, setNewSetRepsText] = useState<string>("");
     const [addingNewWorkout, setAddingNewWorkout] = useState(false);
-    const [error, setError] = useState({ message: "", shouldDisplay: false });
     const { onSave } = props;
 
     useEffect(() => {
@@ -42,7 +42,7 @@ export default function(props: ExerciseFormProps){
         const setRepsValue = Number(newSetRepsText);
 
         if(!isValid(setAmtValue) || !isValid(setRepsValue) || setRepsValue === 0){
-            setError({ message: "Need valid value for amount and reps", shouldDisplay: true });
+            showSnackbar("Need valid value for amount and reps");
             return;
         }
 
@@ -54,12 +54,12 @@ export default function(props: ExerciseFormProps){
     const saveExercise = () => {
 
         if(newExerciseName.length == 0) {
-            setError({ message: "Need an exercise name", shouldDisplay: true });
+            showSnackbar("Need an exercise name");
             return;
         }
 
         if(sets.length == 0){
-            setError({ message: "Add some sets", shouldDisplay: true });
+            showSnackbar("Add some sets");
             return;
         }
 
@@ -117,13 +117,6 @@ export default function(props: ExerciseFormProps){
                 <Text style={{ fontSize: 32, color: "gray" }}>Next</Text>
             </Pressable>
         </View>
-        <ErrorMessageBar
-            visible={error.shouldDisplay}
-            duration={3000}
-            onDismiss={() => setError({ ...error, shouldDisplay: false })}
-            style={{ width: "80%" }}>
-                {error.message}
-        </ErrorMessageBar>
         </>
     );
 }

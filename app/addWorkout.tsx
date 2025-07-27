@@ -9,6 +9,7 @@ import ExerciseForm from '../components/ExerciseForm';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
+import { showSnackbar } from '../util/snackbars';
 
 export default function () {
     const dt = DateTime.now();
@@ -18,6 +19,11 @@ export default function () {
     const [exercises, setExercises] = useState<ExerciseModel[]>([]);
 
     const addWorkout = useCallback(async () => {
+        if(exercises.length === 0){
+            showSnackbar("Please add at least one exercise.");
+            return;
+        } 
+
         const workout = { date: dt.toString(), exercises }
         await workoutRepository.add(db, workout);
         router.back();
@@ -28,7 +34,7 @@ export default function () {
     };
 
     return (
-        <View style={{ marginTop: 15, flex: 1, justifyContent: "flex-start" }}>
+        <View style={{ width: "100%", marginTop: 15, flex: 1, justifyContent: "flex-start" }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
                 <Ionicons name="arrow-back" onPress={() => router.back()} size={32} />
                 <Ionicons name="checkmark" onPress={() => addWorkout()} size={32} />
